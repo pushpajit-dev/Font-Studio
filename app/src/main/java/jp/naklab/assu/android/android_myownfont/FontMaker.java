@@ -107,20 +107,52 @@ public class FontMaker {
 
     ArrayList<String> fontGlyphs;
     OpenCVEdgeDetector edgeDetector;
+    java.util.Map<String, String> customGlyphsMap = new java.util.LinkedHashMap<>();
 
     public FontMaker() {
         fontGlyphs = new ArrayList<>();
         edgeDetector = new OpenCVEdgeDetector();
     }
 
-    public String makeFontSvg(String fontName) {
-        String svg = "";
-        svg = createFontSvgStart(fontName.replaceAll("\\s+", ""), fontName);
-        for (String glyph : fontGlyphs) {
-            svg = svg + "            " +  glyph + "\n";
+    public void addCustomGlyph(String glyphName, String unicode, String pathD, int horizAdvX) {
+        String glyph = "<glyph d=\"" + pathD + "\" glyph-name=\"" + glyphName +
+                "\" horiz-adv-x=\"" + horizAdvX +
+                "\" unicode=\"" + unicode +
+                "\" vert-adv-y=\"1000\" />";
+        customGlyphsMap.put(glyphName, glyph);
+    }
+
+    public void applyGeminiGlyphs(java.util.List<jp.naklab.assu.android.android_myownfont.services.GeminiFontService.GlyphData> glyphs) {
+        if (glyphs == null) return;
+        for (jp.naklab.assu.android.android_myownfont.services.GeminiFontService.GlyphData g : glyphs) {
+            addCustomGlyph(g.glyphName, g.unicode, g.pathD, g.horizAdvX);
         }
-        svg = svg + fontSvgEnd;
-        return svg;
+    }
+
+    public void clearCustomGlyphs() {
+        customGlyphsMap.clear();
+        fontGlyphs.clear();
+    }
+
+    public boolean hasGlyphs() {
+        return !customGlyphsMap.isEmpty() || !fontGlyphs.isEmpty();
+    }
+
+    public boolean hasGlyph(String glyphName) {
+        return customGlyphsMap.containsKey(glyphName);
+    }
+
+    public String makeFontSvg(String fontName) {
+        StringBuilder svg = new StringBuilder();
+        svg.append(createFontSvgStart(fontName.replaceAll("\\s+", ""), fontName));
+        for (String glyph : customGlyphsMap.values()) {
+            svg.append("            ").append(glyph).append("\n");
+        }
+        for (String glyph : fontGlyphs) {
+            svg.append("            ").append(glyph).append("\n");
+        }
+        svg.append(fontSvgEnd);
+        return svg.toString();
     }
 
     private String createFontSvgStart(String fontId, String fontFamily) {

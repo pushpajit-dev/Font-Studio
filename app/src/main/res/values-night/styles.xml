@@ -1,0 +1,36 @@
+<resources>
+
+    <!-- Base application theme (Dark Mode). -->
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#82D3E0</item>
+        <item name="colorOnPrimary">#00363D</item>
+        <item name="colorPrimaryContainer">#004F58</item>
+        <item name="colorOnPrimaryContainer">#9EEFFD</item>
+
+        <item name="colorSecondary">#B1CBD0</item>
+        <item name="colorOnSecondary">#1C3438</item>
+        <item name="colorSecondaryContainer">#334B4F</item>
+        <item name="colorOnSecondaryContainer">#CDE7EC</item>
+
+        <item name="colorTertiary">#BAC6EA</item>
+        <item name="colorOnTertiary">#24304D</item>
+
+        <item name="colorError">#FFB4AB</item>
+        <item name="colorOnError">#690005</item>
+
+        <item name="android:colorBackground">#121212</item>
+        <item name="colorOnBackground">#E1E3E3</item>
+        
+        <item name="colorSurface">#1E1E1E</item>
+        <item name="colorOnSurface">#E1E3E3</item>
+        <item name="colorSurfaceVariant">#2C2C2C</item>
+        <item name="colorOnSurfaceVariant">#C4C7C8</item>
+        <item name="colorOutline">#8E9192</item>
+
+        <!-- Explicit text colors for spinners, dialogs & inputs in Dark mode -->
+        <item name="android:textColorPrimary">#E1E3E3</item>
+        <item name="android:textColorSecondary">#C4C7C8</item>
+        <item name="android:textColor">#E1E3E3</item>
+    </style>
+
+</resources>

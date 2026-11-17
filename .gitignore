@@ -11,3 +11,9 @@
 /build
 /captures
 .externalNativeBuild
+*.ttf
+*.otf
+*.apk
+*.jks
+*.keystore
+openCVLibrary341/build/

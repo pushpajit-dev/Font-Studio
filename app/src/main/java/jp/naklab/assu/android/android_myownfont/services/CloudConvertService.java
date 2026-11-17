@@ -6,9 +6,14 @@ import retrofit2.Call;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
+import retrofit2.http.Query;
 
 public interface CloudConvertService {
-    @Multipart // PathはベースURLを抜いたものでOK
-    @POST("v1/convert?input=upload&outputformat=ttf&inputformat=svg&apikey=" + APIUtil.string + "&wait=true&download=inline")
-    Call<ResponseBody> upload(@Part MultipartBody.Part file);
+    @Multipart
+    @POST("v1/convert?input=upload&inputformat=svg&wait=true&download=inline")
+    Call<ResponseBody> upload(
+            @Query("outputformat") String outputFormat,
+            @Query("apikey") String apiKey,
+            @Part MultipartBody.Part file
+    );
 }

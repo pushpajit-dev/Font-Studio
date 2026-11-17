@@ -1,5 +1,10 @@
 <resources>
-    <string name="app_name">android-myownfont</string>
+    <string name="app_name">Font Studio</string>
+    <string name="font_manager">Font Manager</string>
+    <string name="share_font">Share Font</string>
+    <string name="install_font">Install / View Font</string>
+    <string name="delete_font">Delete Font</string>
+    <string name="create_zip">Package as ZIP</string>
 
     <string-array
         name="string_array_font_menu">

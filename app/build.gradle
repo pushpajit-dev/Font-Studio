@@ -1,34 +1,63 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    namespace 'jp.naklab.assu.android.android_myownfont'
+    compileSdkVersion 34
+
     defaultConfig {
         applicationId "jp.naklab.assu.android.android_myownfont"
-        minSdkVersion 19
-        targetSdkVersion 28
+        minSdkVersion 21
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('../fontstudio-release.jks')
+            storePassword 'FontStudio2025!'
+            keyAlias 'fontstudio'
+            keyPassword 'FontStudio2025!'
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation group: 'org.json', name: 'json', version: '20190722'
-    implementation 'com.stanfy:gson-xml-java:0.1.7'
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support.constraint:constraint-layout:2.0.0-beta2'
-    testImplementation 'junit:junit:4.13-beta-3'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    // Retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.6.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.viewpager2:viewpager2:1.1.0'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+
+    // Retrofit & OkHttp
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.11.0'
+    
     implementation project(path: ':openCVLibrary341')
-    implementation 'com.google.android.material:material:1.1.0-alpha09'
+    
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }

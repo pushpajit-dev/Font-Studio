@@ -20,7 +20,8 @@ import retrofit2.Response;
 
 public class CloudConvert {
     final String TAG = "CloudConvert";
-    private String ttfFileName = "";
+    private String outputFileName = "";
+    private String targetFormat = "ttf";
     private OnConvertFinishListener listener;
 
     public void setListener(OnConvertFinishListener listener) {
@@ -28,122 +29,100 @@ public class CloudConvert {
     }
 
     public void convert(String fontSvgfilePath, String fontName) {
+        convert(fontSvgfilePath, fontName, "ttf", APIUtil.string);
+    }
+
+    public void convert(String fontSvgfilePath, String fontName, String format, String apiKey) {
+        this.targetFormat = (format != null && format.equalsIgnoreCase("otf")) ? "otf" : "ttf";
         CloudConvertService service = CloudConvertServiceGenerator.createService(CloudConvertService.class);
 
-        ttfFileName = fontName.replaceAll("\\s+", "");
+        outputFileName = fontName.replaceAll("\\s+", "");
 
-        // POSTする画像・音楽・動画等のファイル
+        // POST SVG file
         File file = new File(fontSvgfilePath);
 
         if (!file.exists()) {
-            Log.d(TAG, "not exists" + file.getPath());
+            Log.d(TAG, "not exists " + file.getPath());
+            if (listener != null) listener.onConvertFailure("File does not exist: " + file.getPath());
             return;
         }
-
 
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
 
-        Call<ResponseBody> call = service.upload(body);
+        Call<ResponseBody> call = service.upload(targetFormat, apiKey != null ? apiKey : APIUtil.string, body);
         call.enqueue(new Callback<ResponseBody>() {
-
-            // ステータスコードが４００等エラーコード以外のとき呼ばれる
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                CloudConvert.this.onResponse(response);
-                listener.onConvertComplete();
+                if (!response.isSuccessful()) {
+                    Log.e(TAG, "Response failed: " + response.code() + " " + response.message());
+                    if (listener != null) listener.onConvertFailure("HTTP " + response.code() + ": " + response.message());
+                    return;
+                }
+                DownloadFileAsyncTask downloadFileAsyncTask = new DownloadFileAsyncTask();
+                downloadFileAsyncTask.execute(response.body().byteStream());
             }
 
-            // ステータスコードが４００等エラーコードのとき呼ばれる
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                CloudConvert.this.onFailure();
-                listener.onConvertFailure();
+                Log.e(TAG, "Request failed", t);
+                if (listener != null) listener.onConvertFailure(t.getMessage());
             }
         });
     }
 
-    // レスポンスをもらった時の処理
-    private void onResponse(Response<ResponseBody> response) {
-        // 成功時の処理
-        // response.body();でHTMLレスポンスのbodyタグ内が取れる
-        Log.d(TAG, "succeeded");
-
-        if (!response.isSuccessful()) {
-            Log.e(TAG, "Something's gone wrong");
-            // TODO: show error message
-            return;
-        }
-        DownloadFileAsyncTask downloadFileAsyncTask = new DownloadFileAsyncTask();
-        downloadFileAsyncTask.execute(response.body().byteStream());
-    }
-
-    // レスポンスがもらえなかった時の処理
-    private void onFailure() {
-        // 失敗時の処理
-        Log.d(TAG, "failed");
-    }
-
-    // レスポンスから ttf データを取り出して、.ttfファイルを書き出すクラス
-    // https://gldraphael.com/blog/downloading-a-file-using-retrofit/
-    private class DownloadFileAsyncTask extends AsyncTask<InputStream, Void, Boolean> {
-
+    private class DownloadFileAsyncTask extends AsyncTask<InputStream, Void, String> {
         final String appDirectoryName = "fonts";
         final File imageRoot = new File(Environment.getExternalStorageDirectory().getPath(), appDirectoryName);
-        //        final String filename = "sample_svg_rialto.ttf";
-        final String filename = ttfFileName + ".ttf";
+        final String filename = outputFileName + "." + targetFormat;
 
         @Override
-        protected Boolean doInBackground(InputStream... params) {
+        protected String doInBackground(InputStream... params) {
             InputStream inputStream = params[0];
+            if (!imageRoot.exists()) {
+                imageRoot.mkdirs();
+            }
             File file = new File(imageRoot, filename);
             OutputStream output = null;
             try {
                 output = new FileOutputStream(file);
 
-                byte[] buffer = new byte[1024]; // or other buffer size
+                byte[] buffer = new byte[1024];
                 int read;
 
-                Log.d(TAG, "Attempting to write to: " + imageRoot + "/" + filename);
+                Log.d(TAG, "Writing to: " + file.getAbsolutePath());
                 while ((read = inputStream.read(buffer)) != -1) {
                     output.write(buffer, 0, read);
-                    Log.v(TAG, "Writing to buffer to output stream.");
                 }
-                Log.d(TAG, "Flushing output stream.");
                 output.flush();
-                Log.d(TAG, "Output flushed.");
+                return file.getAbsolutePath();
             } catch (IOException e) {
-                Log.e(TAG, "IO Exception: " + e.getMessage());
-                e.printStackTrace();
-                return false;
+                Log.e(TAG, "IO Exception: " + e.getMessage(), e);
+                return null;
             } finally {
                 try {
-                    if (output != null) {
-                        output.close();
-                        Log.d(TAG, "Output stream closed sucessfully.");
-                    } else {
-                        Log.d(TAG, "Output stream is null");
-                    }
+                    if (output != null) output.close();
+                    if (inputStream != null) inputStream.close();
                 } catch (IOException e) {
-                    Log.e(TAG, "Couldn't close output stream: " + e.getMessage());
-                    e.printStackTrace();
-                    return false;
+                    Log.e(TAG, "Error closing stream", e);
                 }
             }
-            return true;
         }
 
         @Override
-        protected void onPostExecute(Boolean result) {
-            super.onPostExecute(result);
-
-            Log.d(TAG, "Download success: " + result);
-            // TODO: show a snackbar or a toast
+        protected void onPostExecute(String resultPath) {
+            super.onPostExecute(resultPath);
+            if (resultPath != null) {
+                Log.d(TAG, "Download success: " + resultPath);
+                if (listener != null) listener.onConvertComplete(resultPath, targetFormat);
+            } else {
+                if (listener != null) listener.onConvertFailure("Failed to write font file.");
+            }
         }
     }
 
     public interface OnConvertFinishListener {
-        void onConvertComplete();
-        void onConvertFailure();
+        void onConvertComplete(String filePath, String format);
+        void onConvertFailure(String error);
     }
 }

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_theme_toggle"
+        android:icon="@drawable/ic_theme_mode"
+        android:title="Toggle Theme"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_language"
+        android:icon="@drawable/ic_text_fields"
+        android:title="Language &amp; Script"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_model_library"
+        android:icon="@drawable/ic_auto_awesome"
+        android:title="Model Library"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_font_manager"
+        android:icon="@drawable/ic_folder"
+        android:title="Font Manager"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_save_session"
+        android:icon="@drawable/ic_check_circle"
+        android:title="Save Project Session"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_load_session"
+        android:icon="@drawable/ic_folder"
+        android:title="Load Project Session"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_unlock_workflow"
+        android:icon="@drawable/ic_tune"
+        android:title="Studio Workflow Lock"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_settings"
+        android:title="API Settings"
+        app:showAsAction="never" />
+</menu>
